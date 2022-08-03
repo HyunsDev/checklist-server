@@ -1,0 +1,141 @@
+service: checklist-server
+org: hyunsdev
+
+frameworkVersion: '2'
+
+custom:
+  customDomain:
+    domainName: checklist.hyuns.dev
+    basePath: ''
+    stage: ${self:provider.stage}
+    certificateName: 'checklist.hyuns.dev'
+
+  serverless-offline:
+    httpPort: 4000
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+  region: ap-northeast-2
+  stage: production
+
+useEnv: true
+plugins:
+  - serverless-plugin-typescript
+  - serverless-dotenv-plugin	
+  - serverless-domain-manager
+  - serverless-offline
+
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters: 
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId: 
+          Ref: "ApiGatewayRestApi" 
+    GatewayResponseDefault5XX: 
+      Type: "AWS::ApiGateway::GatewayResponse" 
+      Properties: 
+        ResponseParameters: 
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'" 
+        ResponseType: DEFAULT_5XX
+        RestApiId: 
+          Ref: "ApiGatewayRestApi"
+          
+functions:
+  hello:
+    handler: src/functions/handler.hello
+    events:
+      - http:
+          cors: true
+          path: hello
+          method: get
+
+  authLogin:
+    handler: src/functions/auth.login
+    events: 
+      - http:
+          cors: true
+          path: auth/login
+          method: post
+
+  authCreateAccount:
+    handler: src/functions/auth.createAccount
+    events: 
+      - http:
+          cors: true
+          path: auth/account
+          method: post
+
+  authDeleteAccount:
+    handler: src/functions/auth.deleteAccount
+    events: 
+      - http:
+          cors: true
+          path: auth/account
+          method: delete
+
+  authPatchAccount:
+    handler: src/functions/auth.patchAccount
+    events: 
+      - http:
+          cors: true
+          path: auth/account
+          method: patch
+
+  authGetAccount:
+    handler: src/functions/auth.getAccount
+    events: 
+      - http:
+          cors: true
+          path: auth/account
+          method: get
+  
+  createCheckList:
+    handler: src/functions/checklist.createCheckList
+    events: 
+      - http:
+          cors: true
+          path: checklist
+          method: post
+
+  getCheckLists:
+    handler: src/functions/checklist.getCheckLists
+    events: 
+      - http:
+          cors: true
+          path: checklist
+          method: get
+  
+  getCheckList:
+    handler: src/functions/checklist.getCheckList
+    events: 
+      - http:
+          cors: true
+          path: checklist/{uuid}
+          method: get
+  
+  patchCheckList:
+    handler: src/functions/checklist.patchCheckList
+    events: 
+      - http:
+          cors: true
+          path: checklist/{uuid}
+          method: patch
+
+  getCheck:
+    handler: src/functions/checklist.createCheck
+    events: 
+      - http:
+          cors: true
+          path: checklist/{uuid}/check
+          method: post
+  
+
+    
